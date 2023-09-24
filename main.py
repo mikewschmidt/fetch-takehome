@@ -1,5 +1,3 @@
-from awscli import clidriver
-import localstack_client.session as boto3
 import boto3
 import json
 from datetime import datetime
@@ -7,9 +5,11 @@ import hashlib
 import psycopg2
 
 ###  FUNCTIONS  ###
+
+
 def convert_messages(messages: list) -> list:
     """A list of strings from SQS to dict and hashes PII  and returns a list of dictionaries
-            
+
         Use this function to pass in the response json/dictionary object,
         so it can extract the correct data and hash mask two PII data points: "device_id" and "ip".
     """
@@ -22,12 +22,13 @@ def convert_messages(messages: list) -> list:
             message.delete()
             continue
         body['create_date'] = date
-        body['device_id'] = hashlib.sha3_256(body['device_id'].encode()).hexdigest()
+        body['device_id'] = hashlib.sha3_256(
+            body['device_id'].encode()).hexdigest()
         body['ip'] = hashlib.sha3_256(body['ip'].encode()).hexdigest()
         body['receipt_handle'] = message.receipt_handle
         l_messages.append(body)
         print(body)
-    
+
     return l_messages
 
 
@@ -38,7 +39,7 @@ def mask(pii: str) -> str:
 
 def db_execute_statement(sql_statement: str):
     """Makes a connection to the database and executes the input SQL statement."""
-    
+
     try:
         conn = psycopg2.connect(
             database="postgres",
@@ -47,7 +48,7 @@ def db_execute_statement(sql_statement: str):
             password="postgres",
             port='5432'
         )
-    except(Exception) as e:
+    except (Exception) as e:
         print("ERROR! Connecting to the database. ", e)
 
     try:
@@ -55,15 +56,15 @@ def db_execute_statement(sql_statement: str):
             cur.execute(sql_statement)
             output = None
             conn.commit()
-    
-    except(Exception, psycopg2.DatabaseError) as e:
+
+    except (Exception, psycopg2.DatabaseError) as e:
         print("ERROR! There was a problem with executing the SQL statement: ", e)
         output = e
 
     finally:
         conn.close()
         return output
-    
+
 
 def db_insert_messages(l_messages: list):
     """ Inserts all the messages into the database.
@@ -74,7 +75,7 @@ def db_insert_messages(l_messages: list):
     if not l_messages or len(l_messages) == 0:
         print("Messages is empty, can not insert anything into the database")
         return
-    
+
     for message in l_messages:
         body = json.loads(message.body)
         print(body)
@@ -97,7 +98,6 @@ def db_insert_messages(l_messages: list):
             message.delete()
         else:
             print("Something bad happened when inserting into the database")
-    
 
 
 if __name__ == "__main__":
@@ -107,22 +107,24 @@ if __name__ == "__main__":
 
     # Creating the SQS and queue objects
     sqs = boto3.resource(
-        'sqs', 
-        endpoint_url='http://localhost:4566', 
-        region_name="us-east-1", 
-        aws_access_key_id="access_key_id", 
+        'sqs',
+        endpoint_url='http://localhost:4566',
+        region_name="us-east-1",
+        aws_access_key_id="access_key_id",
         aws_secret_access_key="secret"
-        )
+    )
     queue = sqs.get_queue_by_name(QueueName='login-queue')
 
     ### PROCESS ALL THE MESSAGES FROM THE QUEUE ###
-    messages = queue.receive_messages(MaxNumberOfMessages=10, WaitTimeSeconds=1, VisibilityTimeout=20)
+    messages = queue.receive_messages(
+        MaxNumberOfMessages=10, WaitTimeSeconds=1, VisibilityTimeout=20)
     count = 0
-    
+
     while len(messages) > 0:
         count += len(messages)
         # Inserts the messages into the database
         db_insert_messages(messages)
-        messages = queue.receive_messages(MaxNumberOfMessages=10, WaitTimeSeconds=1, VisibilityTimeout=20)
+        messages = queue.receive_messages(
+            MaxNumberOfMessages=10, WaitTimeSeconds=1, VisibilityTimeout=20)
 
     print(count)
