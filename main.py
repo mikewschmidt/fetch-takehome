@@ -127,4 +127,4 @@ if __name__ == "__main__":
         messages = queue.receive_messages(
             MaxNumberOfMessages=10, WaitTimeSeconds=1, VisibilityTimeout=20)
 
-    print(count)
+    print(count, "messages were extracted, transformed and loaded into the database")
