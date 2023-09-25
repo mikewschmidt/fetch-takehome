@@ -10,22 +10,26 @@ How would you deploy this application in production?
 \*The obvious location for production would be on AWS. I would use SQS and setup a trigger to use Lambda whenever a new message is in the queue. Lambda will do the transform and loading it into a Postgres AWS RDS database.
 
 What other components would you want to add to make this production ready?
-*I would do a lot more testing for various performance metrics, system/connection failures and test for bugs.
-*Tuning it for better proformance, like batch loading into the database instead of doing it one at a time.
-*Add/setup more security around the system.
-*Good quality documentation.
-*Error handling and logging.
-*Backup and recovery.
+
+- I would do a lot more testing for various performance metrics, system/connection failures and test for bugs.
+- Tuning it for better proformance, like batch loading into the database instead of doing it one at a time.
+- Add/setup more security around the system.
+- Good quality documentation.
+- Error handling and logging.
+- Backup and recovery.
 
 How can this application scale with a growing dataset.
-\*With RDS you can increase the storage when needed and also use auto scaling to scale horizonality.
+
+- With RDS you can increase the storage when needed and also use auto scaling to scale horizonality.
 
 How can PII be recovered later on?
-\*No, I hashed the values which is unrecoverable but it will have the same output for the same input (deterministic). We could encrpyt the values but most encrpytion is not deterministic, so you can not compare the ciphertext. I assumed that if we needed it, we load it into a different table or database with encryption set up.
+
+- No, I hashed the values which is unrecoverable but it will have the same output for the same input (deterministic). We could encrpyt the values but most encrpytion is not deterministic, so you can not compare the ciphertext. I assumed that if we needed it, we load it into a different table or database with encryption set up.
 
 What are the assumptions you made?
-*I assumed the PII did not need to be recovered and was only needed for comparison by analysts.
-*I'm assuming the person reading this will like my personality **MORE** than my code and will hire me. 😉
+
+- I assumed the PII did not need to be recovered and was only needed for comparison by analysts.
+- I'm assuming the person reading this will like my personality **MORE** than my code and will hire me. 😉
 
 ### Want to try it on your system?
 
