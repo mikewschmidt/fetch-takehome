@@ -54,16 +54,18 @@ def db_execute_statement(sql_statement: str):
     try:
         with conn.cursor() as cur:
             cur.execute(sql_statement)
-            output = None
-            conn.commit()
+            # conn.commit()
+            if "SELECT" in sql_statement.upper():
+                return cur.fetchall()
 
     except (Exception, psycopg2.DatabaseError) as e:
         print("ERROR! There was a problem with executing the SQL statement: ", e)
-        output = e
+        return "ERROR!" + e
+
+    # else:
 
     finally:
         conn.close()
-        return output
 
 
 def db_insert_messages(l_messages: list):
@@ -93,7 +95,7 @@ def db_insert_messages(l_messages: list):
                     '{body.get('app_version')}', 
                     '{datetime.now()}');
             """
-        # If something returns then there is an issue
+        # If returns None, then delete the message
         if not db_execute_statement(insert):
             message.delete()
         else:
@@ -127,4 +129,4 @@ if __name__ == "__main__":
         messages = queue.receive_messages(
             MaxNumberOfMessages=10, WaitTimeSeconds=1, VisibilityTimeout=20)
 
-    print(count, "messages were extracted, transformed and loaded into the database")
+    print(count, "messages were extracted, transformed and loaded into the database\n")
