@@ -7,6 +7,8 @@
 1. EXTRACTS: The program reads from a mock AWS SQS (Simple Queue Service) queue
 2. TRANSFORMS: Checks for valid data and masks the PII data
 3. LOADS: Loads the data into a Postgres database
+   
+![ETL](https://github.com/mikewschmidt/fetch-takehome/blob/master/fetch.jpg "Fetch SQS ETL")
 
 #### The Output ####
 Prints out the unmasked messages from the SQS queue. There is 1 dataset that does not fit the format (schema) and was NOT inserted into the database.
